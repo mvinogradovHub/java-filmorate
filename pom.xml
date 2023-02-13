@@ -12,7 +12,7 @@
 	<artifactId>filmorate</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>filmorate</name>
-	<description>Backend for a service that works with movies and user ratings, and also returns the top 5 movies recommended for viewing</description>
+	<description>Backend for service that works with movies and user ratings, and also returns the top 5 movies recommended for viewing</description>
 	<properties>
 		<java.version>11</java.version>
 	</properties>
