@@ -17,28 +17,22 @@ import java.util.HashMap;
 public class UserController {
 
     private HashMap<Integer, User> users = new HashMap<>();
-    private int id = 1;
+    private Integer id = 1;
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) throws ValidationException {
-        log.info("Получен запрос к эндпоинту POST /users с телом сообщения: "+ user);
-        if (user != null && (!users.containsKey(user.getId()) || user.getId() == null)) {
-            user.setId(id);
-            users.put(id, UtilsUser.WriteUserNameFromLogin(user));
-            id++;
-            return users.get(user.getId());
-        } else {
-            log.warn("Ошибка добавления пользователя. Пользователь с ID " + user.getId() + " уже существует");
-            throw new ValidationException("Ошибка добавления пользователя. Пользователь с ID " + user.getId() + " уже существует");
-        }
-
+        log.info("Получен запрос к эндпоинту POST /users с телом сообщения: " + user);
+        user.setId(id);
+        users.put(id, UtilsUser.writeUserNameFromLogin(user));
+        id++;
+        return users.get(user.getId());
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) throws NotFoundException {
-        log.info("Получен запрос к эндпоинту PUT /users с телом сообщения: "+ user);
+        log.info("Получен запрос к эндпоинту PUT /users с телом сообщения: " + user);
         if (users.containsKey(user.getId())) {
-            users.put(user.getId(),UtilsUser.WriteUserNameFromLogin(user));
+            users.put(user.getId(), UtilsUser.writeUserNameFromLogin(user));
             return users.get(user.getId());
         } else {
             log.warn("Ошибка обновления пользователя. Пользователь с ID " + user.getId() + " не найден");
@@ -52,7 +46,6 @@ public class UserController {
         log.info("Получен запрос к эндпоинту GET /users");
         return new ArrayList<>(users.values());
     }
-
 
 
 }

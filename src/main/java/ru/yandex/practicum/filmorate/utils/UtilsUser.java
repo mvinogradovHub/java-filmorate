@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 @Slf4j
 public class UtilsUser {
-    public static User WriteUserNameFromLogin(User user) {
+    public static User writeUserNameFromLogin(User user) {
         String name = user.getName();
         if (name == null || name.isEmpty() || name.isBlank()) {
             user.setName(user.getLogin());

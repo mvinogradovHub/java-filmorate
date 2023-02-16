@@ -18,27 +18,22 @@ public class FilmController {
 
 
     private HashMap<Integer, Film> films = new HashMap<>();
-    private int id = 1;
+    private Integer id = 1;
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) throws ValidationException {
-        log.info("Получен запрос к эндпоинту POST /films с телом сообщения: "+ film);
-        Validate.AdditionalValidateFilm(film);
-        if (!films.containsKey(film.getId())) {
-            film.setId(id);
-            films.put(film.getId(), film);
-            id++;
-            return films.get(film.getId());
-        } else {
-            throw new ValidationException("Ошибка добавления фильма. Фильм с ID " + film.getId() + " уже существует");
-        }
-
+        log.info("Получен запрос к эндпоинту POST /films с телом сообщения: " + film);
+        Validate.additionalValidateFilm(film);
+        film.setId(id);
+        films.put(film.getId(), film);
+        id++;
+        return films.get(film.getId());
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) throws NotFoundException, ValidationException {
-        log.info("Получен запрос к эндпоинту PUT /films с телом сообщения: "+ film);
-        Validate.AdditionalValidateFilm(film);
+        log.info("Получен запрос к эндпоинту PUT /films с телом сообщения: " + film);
+        Validate.additionalValidateFilm(film);
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
             return films.get(film.getId());
