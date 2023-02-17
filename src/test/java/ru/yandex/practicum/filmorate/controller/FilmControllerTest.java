@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.Exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.utils.Validate;
+import ru.yandex.practicum.filmorate.utils.FilmValidator;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -30,12 +30,12 @@ public class FilmControllerTest {
         film.setReleaseDate(LocalDate.of(1895, 12, 27));
         exception = assertThrows(
                 ValidationException.class,
-                () -> Validate.additionalValidateFilm(film)
+                () -> FilmValidator.additionalValidateFilm(film)
         );
         assertEquals("Дата релиза фильма не может быть раньше 28.12.1895 г.", exception.getMessage());
 
         film.setReleaseDate(LocalDate.of(1895, 12, 28));
-        assertDoesNotThrow(() -> Validate.additionalValidateFilm(film), "Не должно быть исключения при дате релиза 28.12.1895");
+        assertDoesNotThrow(() -> FilmValidator.additionalValidateFilm(film), "Не должно быть исключения при дате релиза 28.12.1895");
     }
 
     @Test
@@ -43,12 +43,12 @@ public class FilmControllerTest {
         film.setDescription("Пятеро друзей ( комик-группа «Шарло»), приезжают в город Бризуль. Здесь они хотят разыскать господина Огюста Куглова, который задолжал им деньги, а именно 20 миллионов. о Куглов, который за время «свое");
         exception = assertThrows(
                 ValidationException.class,
-                () -> Validate.additionalValidateFilm(film)
+                () -> FilmValidator.additionalValidateFilm(film)
         );
         assertEquals("Длина описания не может превышать 200 символов", exception.getMessage());
 
         film.setDescription("А");
-        assertDoesNotThrow(() -> Validate.additionalValidateFilm(film), "Не должно быть исключения при при описании в одну букву");
+        assertDoesNotThrow(() -> FilmValidator.additionalValidateFilm(film), "Не должно быть исключения при при описании в одну букву");
 
     }
 
@@ -57,12 +57,12 @@ public class FilmControllerTest {
         film.setDuration(Duration.ofSeconds(-1));
         exception = assertThrows(
                 ValidationException.class,
-                () -> Validate.additionalValidateFilm(film)
+                () -> FilmValidator.additionalValidateFilm(film)
         );
         assertEquals("Продолжительность фильма не может быть отрицательной", exception.getMessage());
 
         film.setDuration(Duration.ofSeconds(1));
-        assertDoesNotThrow(() -> Validate.additionalValidateFilm(film), "Не должно быть исключения при продолжительности в 1 сек");
+        assertDoesNotThrow(() -> FilmValidator.additionalValidateFilm(film), "Не должно быть исключения при продолжительности в 1 сек");
     }
 
 }

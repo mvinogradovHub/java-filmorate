@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.Exception.NotFoundException;
 import ru.yandex.practicum.filmorate.Exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.utils.Validate;
+import ru.yandex.practicum.filmorate.utils.FilmValidator;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class FilmController {
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) throws ValidationException {
         log.info("Получен запрос к эндпоинту POST /films с телом сообщения: " + film);
-        Validate.additionalValidateFilm(film);
+        FilmValidator.additionalValidateFilm(film);
         film.setId(id);
         films.put(film.getId(), film);
         id++;
@@ -33,7 +33,7 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) throws NotFoundException, ValidationException {
         log.info("Получен запрос к эндпоинту PUT /films с телом сообщения: " + film);
-        Validate.additionalValidateFilm(film);
+        FilmValidator.additionalValidateFilm(film);
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
             return films.get(film.getId());

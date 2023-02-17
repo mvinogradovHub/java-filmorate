@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 
-public class Validate {
+public class FilmValidator {
     public static void additionalValidateFilm(Film film) throws ValidationException {
         if (film.getDescription().length() > 200) {
             throw new ValidationException("Длина описания не может превышать 200 символов");
