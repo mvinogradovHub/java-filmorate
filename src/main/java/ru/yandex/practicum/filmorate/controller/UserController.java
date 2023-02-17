@@ -20,7 +20,7 @@ public class UserController {
     private Integer id = 1;
 
     @PostMapping
-    public User addUser(@Valid @RequestBody User user) throws ValidationException {
+    public User addUser(@Valid @RequestBody User user) {
         log.info("Получен запрос к эндпоинту POST /users с телом сообщения: " + user);
         user.setId(id);
         users.put(id, UtilsUser.writeUserNameFromLogin(user));
@@ -29,7 +29,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user) throws NotFoundException {
+    public User updateUser(@Valid @RequestBody User user) {
         log.info("Получен запрос к эндпоинту PUT /users с телом сообщения: " + user);
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), UtilsUser.writeUserNameFromLogin(user));

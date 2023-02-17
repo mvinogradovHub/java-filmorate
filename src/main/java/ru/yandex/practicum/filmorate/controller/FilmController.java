@@ -21,9 +21,9 @@ public class FilmController {
     private Integer id = 1;
 
     @PostMapping
-    public Film addFilm(@Valid @RequestBody Film film) throws ValidationException {
+    public Film addFilm(@Valid @RequestBody Film film) {
         log.info("Получен запрос к эндпоинту POST /films с телом сообщения: " + film);
-        FilmValidator.additionalValidateFilm(film);
+        FilmValidator.validateFilm(film);
         film.setId(id);
         films.put(film.getId(), film);
         id++;
@@ -31,9 +31,9 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film) throws NotFoundException, ValidationException {
+    public Film updateFilm(@Valid @RequestBody Film film) {
         log.info("Получен запрос к эндпоинту PUT /films с телом сообщения: " + film);
-        FilmValidator.additionalValidateFilm(film);
+        FilmValidator.validateFilm(film);
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
             return films.get(film.getId());

@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.time.LocalDate;
 
 public class FilmValidator {
-    public static void additionalValidateFilm(Film film) throws ValidationException {
+    public static void validateFilm(Film film) {
         if (film.getDescription().length() > 200) {
             throw new ValidationException("Длина описания не может превышать 200 символов");
         } else if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
