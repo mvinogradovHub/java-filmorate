@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.Exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.film.FilmValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.utils.FilmValidator;
 
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class FilmControllerTest {
     Film film;
-    ValidationException exception;
+    FilmValidationException exception;
 
     @BeforeEach
     void init() {
@@ -29,7 +29,7 @@ public class FilmControllerTest {
 
         film.setReleaseDate(LocalDate.of(1895, 12, 27));
         exception = assertThrows(
-                ValidationException.class,
+                FilmValidationException.class,
                 () -> FilmValidator.validateFilm(film)
         );
         assertEquals("Дата релиза фильма не может быть раньше 28.12.1895 г.", exception.getMessage());
@@ -42,7 +42,7 @@ public class FilmControllerTest {
     void additionalValidateFilm_DescriptionLengthMustBeLess_201() {
         film.setDescription("Пятеро друзей ( комик-группа «Шарло»), приезжают в город Бризуль. Здесь они хотят разыскать господина Огюста Куглова, который задолжал им деньги, а именно 20 миллионов. о Куглов, который за время «свое");
         exception = assertThrows(
-                ValidationException.class,
+                FilmValidationException.class,
                 () -> FilmValidator.validateFilm(film)
         );
         assertEquals("Длина описания не может превышать 200 символов", exception.getMessage());
@@ -56,7 +56,7 @@ public class FilmControllerTest {
     void additionalValidateFilm_DurationShouldBePositive() {
         film.setDuration(Duration.ofSeconds(-1));
         exception = assertThrows(
-                ValidationException.class,
+                FilmValidationException.class,
                 () -> FilmValidator.validateFilm(film)
         );
         assertEquals("Продолжительность фильма не может быть отрицательной", exception.getMessage());
