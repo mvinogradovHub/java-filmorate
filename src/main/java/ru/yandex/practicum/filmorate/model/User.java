@@ -10,10 +10,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
 public class User {
     private Set<Long> friends;
     private Long id;
@@ -35,12 +32,5 @@ public class User {
         this.login = login;
         this.name = name;
         this.birthday = birthday;
-    }
-
-    public void addFriend (Long friendId) {
-        friends.add(friendId);
-    }
-    public void deleteFriend (Long friendId) {
-        friends.remove(friendId);
     }
 }

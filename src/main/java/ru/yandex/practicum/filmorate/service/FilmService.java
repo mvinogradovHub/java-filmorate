@@ -1,29 +1,26 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.film.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.user.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
 
     public Film addFilm(Film film) {
         return filmStorage.addFilm(film);
@@ -35,7 +32,7 @@ public class FilmService {
             return filmStorage.updateFilm(film);
         } else {
             log.warn("Ошибка обновления фильма. Фильм с ID " + film.getId() + " не найден");
-            throw new FilmNotFoundException("Ошибка обновления фильма. Фильм с ID " + film.getId() + " не найден");
+            throw new NotFoundException("Ошибка обновления фильма. Фильм с ID " + film.getId() + " не найден");
         }
     }
 
@@ -49,18 +46,22 @@ public class FilmService {
             return receivedFilm;
         } else {
             log.warn("Ошибка получения фильма. Фильм с ID " + id + " не найден");
-            throw new FilmNotFoundException("Ошибка получения фильма. Фильм с ID " + id + " не найден");
+            throw new NotFoundException("Ошибка получения фильма. Фильм с ID " + id + " не найден");
         }
     }
 
     public void addLike(Long filmId, Long userId) {
         checkFilmAndUser(filmId, userId);
-        filmStorage.addLike(filmId, userId);
+        Film film = filmStorage.getFilmById(filmId);
+        film.getIdUsersLike().add(userId);
+        filmStorage.updateFilm(film);
     }
 
     public void deleteLike(Long filmId, Long userId) {
         checkFilmAndUser(filmId, userId);
-        filmStorage.deleteLike(filmId, userId);
+        Film film = filmStorage.getFilmById(filmId);
+        film.getIdUsersLike().remove(userId);
+        filmStorage.updateFilm(film);
     }
 
     public List<Film> getPopularFilms(Integer count) {
@@ -72,11 +73,13 @@ public class FilmService {
         User user = userStorage.getUserById(userId);
         if (user == null) {
             log.warn("Не найден пользователь ID " + userId);
-            throw new UserNotFoundException("Не найден пользователь ID " + userId);
+            throw new NotFoundException("Не найден пользователь ID " + userId);
         }
         if (film == null) {
             log.warn("Не найден фильм ID " + filmId);
-            throw new FilmNotFoundException("Не найден фильм ID " + userId);
+            throw new NotFoundException("Не найден фильм ID " + userId);
         }
+
     }
+
 }

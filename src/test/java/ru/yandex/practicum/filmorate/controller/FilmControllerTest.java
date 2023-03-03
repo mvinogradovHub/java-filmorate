@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.film.FilmValidationException;
+import ru.yandex.practicum.filmorate.exception.FilmValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.utils.FilmValidator;
 
@@ -17,11 +17,7 @@ public class FilmControllerTest {
 
     @BeforeEach
     void init() {
-        film = Film.builder().name("2012")
-                .description("Фильм катастрофа")
-                .duration(Duration.ofHours(1))
-                .releaseDate(LocalDate.of(2022, 12, 27))
-                .build();
+        film = new Film(null,"2012","Фильм катастрофа",LocalDate.of(2022, 12, 27),Duration.ofHours(1));
     }
 
     @Test
