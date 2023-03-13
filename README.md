@@ -1,6 +1,8 @@
 # java-filmorate
 Template repository for Filmorate project.
 
+## Cхема базы данных
+
 ![Схема базы данных](https://github.com/mvinogradovHub/java-filmorate/blob/main/QuickDBD-Free%20Diagram.png)
 
 ## Примеры запросов
