@@ -22,7 +22,7 @@ WHERE
     sender_id     = 3
     AND confirmed = true
     
-### Получить список обзих друзей для пользователей с ID 3 и 5
+### Получить список общих друзей для пользователей с ID 3 и 5
 SELECT
     s.sender_id
 FROM
@@ -46,11 +46,11 @@ WHERE
 ### Получить топ 10 популярных фильмов
 SELECT
     film_id,
-    COUNT (user_id) AS like_Count
+    COUNT (user_id) AS like_count
 FROM
     film_like fl
 GROUP BY
     film_id
 ORDER BY
-    like_Count desc 
+    like_count desc 
 LIMIT 10
