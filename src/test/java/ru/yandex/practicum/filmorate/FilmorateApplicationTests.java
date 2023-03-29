@@ -156,11 +156,13 @@ class FilmoRateApplicationTests {
         Mpa mpa = mpaDbStorage.getMpaById(2L);
         assertThat(mpa.getName(), Matchers.is("PG"));
     }
+
     @Test
     public void testGetGenre() {
         List<Genre> genre = genreDbStorage.getGenre();
         assertThat(genre.size(), Matchers.is(6));
     }
+
     @Test
     public void testGetGenreByID() {
         Genre genre = genreDbStorage.getGenreById(2L);

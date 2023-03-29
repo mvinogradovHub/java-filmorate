@@ -63,8 +63,8 @@ public class InMemoryUserStorage implements UserStorage {
         User friend = users.get(friendId);
         user.getFriends().add(friendId);
         friend.getFriends().add(userId);
-        users.put(user.getId(),user);
-        users.put(friend.getId(),friend);
+        users.put(user.getId(), user);
+        users.put(friend.getId(), friend);
     }
 
     @Override
@@ -73,8 +73,8 @@ public class InMemoryUserStorage implements UserStorage {
         User friend = users.get(friendId);
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
-        users.put(user.getId(),user);
-        users.put(friend.getId(),friend);
+        users.put(user.getId(), user);
+        users.put(friend.getId(), friend);
     }
 
 }
