@@ -38,9 +38,9 @@ public class MpaDbStorage implements MpaStorage {
     }
 
     @Override
-    public Mpa getMpaById(Long MpaId) {
+    public Mpa getMpaById(Long mpaId) {
         String sqlSelectMpa = "SELECT * FROM MPA WHERE MPA_ID = ?";
-        List<Mpa> mpa = jdbcTemplate.query(sqlSelectMpa, (rs, rowNum) -> makeMpa(rs), MpaId);
+        List<Mpa> mpa = jdbcTemplate.query(sqlSelectMpa, (rs, rowNum) -> makeMpa(rs), mpaId);
         if (mpa.isEmpty()) {
             return null;
         }
