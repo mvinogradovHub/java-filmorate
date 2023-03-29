@@ -1,18 +1,14 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.utils.UtilsUser;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
 
 @Slf4j
@@ -51,23 +47,13 @@ public class UserService {
 
     public void addFriend(Long userId, Long friendId) {
         checkUsers(userId, friendId, false);
-        User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(friendId);
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
-        userStorage.updateUser(user);
-        userStorage.updateUser(friend);
+        userStorage.addFriend(userId, friendId);
 
     }
 
     public void deleteFriend(Long userId, Long friendId) {
         checkUsers(userId, friendId, true);
-        User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(friendId);
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
-        userStorage.updateUser(user);
-        userStorage.updateUser(friend);
+        userStorage.deleteFriend(userId, friendId);
     }
 
     public Set<User> getCommonFriends(Long userId, Long otherId) {
@@ -76,7 +62,6 @@ public class UserService {
     }
 
     public Set<User> getFriends(Long userId) {
-        User user = userStorage.getUserById(userId);
         return userStorage.getFriends(userId);
     }
 
@@ -88,10 +73,6 @@ public class UserService {
                 if (!user.getFriends().contains(otherId)) {
                     log.warn("У пользователя ID " + userId + " не найден друг с ID " + otherId);
                     throw new NotFoundException("У пользователя ID " + userId + " не найден друг с ID " + otherId);
-                }
-                if (!other.getFriends().contains(userId)) {
-                    log.warn("У пользователя ID " + otherId + " не найден друг с ID " + userId);
-                    throw new NotFoundException("У пользователя ID " + otherId + " не найден друг с ID " + userId);
                 }
             }
             return;
