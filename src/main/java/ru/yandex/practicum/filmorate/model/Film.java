@@ -33,6 +33,6 @@ public class Film {
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.genres = genres;
-        this.mpa =mpa;
+        this.mpa = mpa;
     }
 }
