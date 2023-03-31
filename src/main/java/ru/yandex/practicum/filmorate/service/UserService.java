@@ -18,6 +18,7 @@ public class UserService {
     private final UserStorage userStorage;
 
     public User addUser(User user) {
+        UtilsUser.writeUserNameFromLogin(user);
         return userStorage.addUser(user);
     }
 

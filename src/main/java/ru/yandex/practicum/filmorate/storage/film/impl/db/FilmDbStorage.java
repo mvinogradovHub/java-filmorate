@@ -5,13 +5,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.Duration;
-import java.time.LocalDate;
 import java.util.*;
 
 
@@ -19,13 +16,12 @@ import java.util.*;
 @Primary
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final MpaDbStorage mpaDbStorage;
-    private final GenreDbStorage genreDbStorage;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, MpaDbStorage mpaDbStorage, GenreDbStorage genreDbStorage) {
+    private final FilmExtractor filmExtractor;
+
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmExtractor filmExtractor) {
         this.jdbcTemplate = jdbcTemplate;
-        this.mpaDbStorage = mpaDbStorage;
-        this.genreDbStorage = genreDbStorage;
+        this.filmExtractor = filmExtractor;
     }
 
     public Film addFilm(Film film) {
@@ -56,8 +52,13 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlDel, film.getId());
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
-                String sqlInsertGenre = "INSERT INTO FILM_GENRE (FILM_ID,GENRE_ID) VALUES (?,?)";
-                jdbcTemplate.update(sqlInsertGenre, film.getId(), genre.getId());
+                String sqlInsertGenre = "INSERT INTO FILM_GENRE (FILM_ID, GENRE_ID)\n" +
+                        "SELECT ?, ?\n" +
+                        "WHERE NOT EXISTS (\n" +
+                        "SELECT 1 \n" +
+                        "FROM FILM_GENRE\n" +
+                        "WHERE FILM_ID =? AND GENRE_ID =?)";
+                jdbcTemplate.update(sqlInsertGenre, film.getId(), genre.getId(),film.getId(), genre.getId());
             }
         }
         return getFilmById(film.getId());
@@ -65,18 +66,27 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilms() {
-        String sqlSelectFilm = "SELECT * FROM FILM";
-        try {
-            return jdbcTemplate.query(sqlSelectFilm, (rs, rowNum) -> makeFilm(rs));
-        } catch (NoSuchElementException e) {
-            return Collections.emptyList();
-        }
+        String sqlSelectFilm = "SELECT f.*,m.NAME AS MPA_NAME, fg.GENRE_ID, g.NAME AS GENRE_NAME,fl.USER_ID AS LIKE_USER_ID\n" +
+                "FROM FILM f\n" +
+                "LEFT JOIN FILM_GENRE fg ON f.FILM_ID = fg.FILM_ID\n" +
+                "LEFT JOIN GENRE g ON fg.GENRE_ID = g.GENRE_ID \n" +
+                "LEFT JOIN FILM_LIKE fl ON f.FILM_ID = fl.FILM_ID \n" +
+                "LEFT JOIN MPA m ON f.MPA_ID = m.MPA_ID\n" +
+                "ORDER BY f.FILM_ID ASC";
+        return  jdbcTemplate.query(sqlSelectFilm, filmExtractor);
     }
 
     @Override
     public Film getFilmById(Long id) {
-        String sqlSelectFilm = "SELECT * FROM FILM WHERE FILM_ID = ?";
-        List<Film> films = jdbcTemplate.query(sqlSelectFilm, (rs, rowNum) -> makeFilm(rs), id);
+        String sqlSelectFilm = "SELECT f.*,m.NAME AS MPA_NAME, fg.GENRE_ID, g.NAME AS GENRE_NAME,fl.USER_ID AS LIKE_USER_ID\n" +
+                "FROM FILM f\n" +
+                "LEFT JOIN FILM_GENRE fg ON f.FILM_ID = fg.FILM_ID\n" +
+                "LEFT JOIN GENRE g ON fg.GENRE_ID = g.GENRE_ID \n" +
+                "LEFT JOIN FILM_LIKE fl ON f.FILM_ID = fl.FILM_ID \n" +
+                "LEFT JOIN MPA m ON f.MPA_ID = m.MPA_ID\n" +
+                "WHERE f.FILM_ID = ?\n" +
+                "ORDER BY f.FILM_ID ASC";
+        List<Film> films = jdbcTemplate.query(sqlSelectFilm, filmExtractor, id);
         if (films.isEmpty()) {
             return null;
         }
@@ -85,17 +95,19 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopularFilms(Integer count) {
-        String sql = "SELECT F.*, COUNT(FL.FILM_LIKE_ID) AS LIKES_COUNT\n" +
-                "FROM FILM F\n" +
-                "LEFT JOIN FILM_LIKE FL ON F.FILM_ID = FL.FILM_ID\n" +
-                "GROUP BY F.FILM_ID\n" +
-                "ORDER BY LIKES_COUNT DESC\n" +
-                "LIMIT ?";
-        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), count);
-        if (films.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return films;
+        String sql = "SELECT f.*, m.NAME AS MPA_NAME, fg.GENRE_ID, g.NAME AS GENRE_NAME, fl.USER_ID AS LIKE_USER_ID\n" +
+                "FROM ( SELECT COUNT(USER_ID) AS LIKE_USER_COUNT, f.*\n" +
+                "FROM FILM_LIKE fl\n" +
+                "RIGHT JOIN FILM f ON f.FILM_ID = fl.FILM_ID\n" +
+                "GROUP BY f.FILM_ID\n" +
+                "ORDER BY LIKE_USER_COUNT DESC\n" +
+                "LIMIT ?) AS f\n" +
+                "LEFT JOIN FILM_GENRE fg ON f.FILM_ID = fg.FILM_ID\n" +
+                "LEFT JOIN GENRE g ON fg.GENRE_ID = g.GENRE_ID\n" +
+                "LEFT JOIN FILM_LIKE fl ON f.FILM_ID = fl.FILM_ID\n" +
+                "LEFT JOIN MPA m ON f.MPA_ID = m.MPA_ID";
+
+        return jdbcTemplate.query(sql,filmExtractor, count);
     }
 
     @Override
@@ -118,21 +130,6 @@ public class FilmDbStorage implements FilmStorage {
         }
         return new HashSet<>(filmLikesId);
 
-    }
-
-
-    private Film makeFilm(ResultSet rs) throws SQLException {
-        Long id = rs.getLong("FILM_ID");
-        String name = rs.getString("NAME");
-        String description = rs.getString("DESCRIPTION");
-        LocalDate releaseDate = rs.getDate("RELEASE_DATE").toLocalDate();
-        Duration duration = Duration.ofSeconds(rs.getInt("DURATION"));
-        Mpa mpa = mpaDbStorage.getMpaById(rs.getLong("MPA_ID"));
-        List<Genre> genres = genreDbStorage.getGenreByFilmId(id);
-        Set<Long> likes = getFilmLikes(id);
-        Film film = new Film(id, name, description, releaseDate, duration, genres, mpa);
-        film.setIdUsersLike(likes);
-        return film;
     }
 
     private Long makeLustId(ResultSet rs) throws SQLException {
