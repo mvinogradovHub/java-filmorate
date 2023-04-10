@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.AllArgsConstructor;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -11,8 +10,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
@@ -36,7 +33,7 @@ public class FilmService {
         }
     }
 
-    public ArrayList<Film> getFilms() {
+    public List<Film> getFilms() {
         return filmStorage.getFilms();
     }
 
@@ -52,16 +49,12 @@ public class FilmService {
 
     public void addLike(Long filmId, Long userId) {
         checkFilmAndUser(filmId, userId);
-        Film film = filmStorage.getFilmById(filmId);
-        film.getIdUsersLike().add(userId);
-        filmStorage.updateFilm(film);
+        filmStorage.addLike(filmId, userId);
     }
 
     public void deleteLike(Long filmId, Long userId) {
         checkFilmAndUser(filmId, userId);
-        Film film = filmStorage.getFilmById(filmId);
-        film.getIdUsersLike().remove(userId);
-        filmStorage.updateFilm(film);
+        filmStorage.deleteLike(filmId, userId);
     }
 
     public List<Film> getPopularFilms(Integer count) {

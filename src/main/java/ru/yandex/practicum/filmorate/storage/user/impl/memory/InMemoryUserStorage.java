@@ -1,7 +1,8 @@
-package ru.yandex.practicum.filmorate.storage.user;
+package ru.yandex.practicum.filmorate.storage.user.impl.memory;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.utils.UtilsUser;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class InMemoryUserStorage implements UserStorage {
         return users.get(user.getId());
     }
 
+
     public ArrayList<User> getUsers() {
         return new ArrayList<>(users.values());
     }
@@ -53,6 +55,26 @@ public class InMemoryUserStorage implements UserStorage {
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toSet());
 
+    }
+
+    @Override
+    public void addFriend(Long userId, Long friendId) {
+        User user = users.get(userId);
+        User friend = users.get(friendId);
+        user.getFriends().add(friendId);
+        friend.getFriends().add(userId);
+        users.put(user.getId(), user);
+        users.put(friend.getId(), friend);
+    }
+
+    @Override
+    public void deleteFriend(Long userId, Long friendId) {
+        User user = users.get(userId);
+        User friend = users.get(friendId);
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(userId);
+        users.put(user.getId(), user);
+        users.put(friend.getId(), friend);
     }
 
 }

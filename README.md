@@ -3,59 +3,64 @@ Template repository for Filmorate project.
 
 ## Cхема базы данных
 
-![Схема базы данных](/QuickDBD-Free Diagram.png)
+![Схема базы данных](/SQLscheme.png)
 
 ## Примеры запросов
 
+### Получить пользователя с ID 1
+```roomsql
+SELECT u.USER_ID, u.EMAIL, u.LOGIN, u.NAME, u.BIRTHDAY, f.RECIPIENT_ID AS FRIEND_ID 
+FROM "USER" u
+LEFT JOIN FRIENDSHIP f ON u.USER_ID = f.SENDER_ID
+WHERE u.USER_ID = 1
+  ```  
+
 ### Получить список друзей для пользователя с ID 3
 ```roomsql
-SELECT
-    sender_id
-FROM
-    friendship f
-WHERE
-    recipient_id  = 3
-    AND confirmed = true
-UNION
-SELECT
-    recipient_id
-FROM
-    friendship f2
-WHERE
-    sender_id     = 3
-    AND confirmed = true
+SELECT common.USER_ID, common.EMAIL, common.LOGIN, common.NAME, common.BIRTHDAY, f.RECIPIENT_ID AS FRIEND_ID
+FROM (SELECT g.USER_ID, g.EMAIL, g.LOGIN, g.NAME, g.BIRTHDAY
+FROM FRIENDSHIP f2
+JOIN "USER" g ON g.USER_ID = f2.RECIPIENT_ID
+WHERE f2.SENDER_ID = 3) AS common
+LEFT JOIN FRIENDSHIP f ON common.USER_ID = f.SENDER_ID
+ORDER BY FRIEND_ID ASC
   ```  
-### Получить список общих друзей для пользователей с ID 3 и 5
+### Получить список общих друзей для пользователей с ID 1 и 2
 ```roomsql
-SELECT
-    s.sender_id
-FROM
-    friendship s
-join friendship r ON s.sender_id = r.recipient_id 
-WHERE
-    s.recipient_id  = 3
-    AND s.confirmed = true
-    and r.confirmed = true
-UNION
-SELECT
-    s.sender_id
-FROM
-    friendship s
-JOIN friendship r ON s.sender_id = r.recipient_id 
-WHERE
-    s.recipient_id  = 5
-    AND s.confirmed = true
-    AND r.confirmed = true
+SELECT common.USER_ID, common.EMAIL, common.LOGIN, common.NAME, common.BIRTHDAY, f.RECIPIENT_ID AS FRIEND_ID
+FROM ( SELECT g.USER_ID, g.EMAIL, g.LOGIN, g.NAME, g.BIRTHDAY 
+	FROM FRIENDSHIP f2
+	JOIN "USER" g ON g.USER_ID = f2.RECIPIENT_ID
+	WHERE f2.SENDER_ID = 1
+	INTERSECT SELECT g.USER_ID, g.EMAIL, g.LOGIN, g.NAME, g.BIRTHDAY
+	FROM FRIENDSHIP f2
+	JOIN "USER" g ON g.USER_ID = f2.RECIPIENT_ID
+	WHERE f2.SENDER_ID = 2
+	) AS common
+LEFT JOIN FRIENDSHIP f ON common.USER_ID = f.SENDER_ID
  ```   
+### Получить все фильмы
+```roomsql
+SELECT f.*,m.NAME AS MPA_NAME, fg.GENRE_ID, g.NAME AS GENRE_NAME,fl.USER_ID AS LIKE_USER_ID
+FROM FILM f
+LEFT JOIN FILM_GENRE fg ON f.FILM_ID = fg.FILM_ID
+LEFT JOIN GENRE g ON fg.GENRE_ID = g.GENRE_ID 
+LEFT JOIN FILM_LIKE fl ON f.FILM_ID = fl.FILM_ID 
+LEFT JOIN MPA m ON f.MPA_ID = m.MPA_ID
+ORDER BY f.FILM_ID ASC
+```
+
 ### Получить топ 10 популярных фильмов
 ```roomsql
-SELECT
-    film_id
-FROM
-    film_like fl
-GROUP BY
-    film_id
-ORDER BY
-   COUNT(user_id) desc 
-LIMIT 10
+SELECT f.*, m.NAME AS MPA_NAME,	fg.GENRE_ID, g.NAME AS GENRE_NAME, fl.USER_ID AS LIKE_USER_ID
+FROM ( SELECT COUNT(USER_ID) AS LIKE_USER_COUNT, f.*
+	FROM FILM_LIKE fl
+	RIGHT JOIN FILM f ON f.FILM_ID = fl.FILM_ID
+	GROUP BY f.FILM_ID
+	ORDER BY LIKE_USER_COUNT DESC
+	LIMIT 10) AS f
+LEFT JOIN FILM_GENRE fg ON f.FILM_ID = fg.FILM_ID
+LEFT JOIN GENRE g ON fg.GENRE_ID = g.GENRE_ID
+LEFT JOIN FILM_LIKE fl ON f.FILM_ID = fl.FILM_ID
+LEFT JOIN MPA m ON f.MPA_ID = m.MPA_ID
 ```

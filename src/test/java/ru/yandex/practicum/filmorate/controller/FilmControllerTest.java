@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.FilmValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.utils.FilmValidator;
 
 import java.time.Duration;
@@ -17,7 +18,7 @@ public class FilmControllerTest {
 
     @BeforeEach
     void init() {
-        film = new Film(null,"2012","Фильм катастрофа",LocalDate.of(2022, 12, 27),Duration.ofHours(1));
+        film = new Film(null,"2012","Фильм катастрофа",LocalDate.of(2022, 12, 27),Duration.ofHours(1), new Mpa(1L,"PG"));
     }
 
     @Test

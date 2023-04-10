@@ -1,7 +1,8 @@
-package ru.yandex.practicum.filmorate.storage.film;
+package ru.yandex.practicum.filmorate.storage.film.impl.memory;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.utils.FilmsComparator;
 
 import java.util.ArrayList;
@@ -37,6 +38,19 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .limit(count)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void addLike(Long filmId, Long userId) {
+        Film film = films.get(filmId);
+        film.getIdUsersLike().add(userId);
+    }
+
+    @Override
+    public void deleteLike(Long filmId, Long userId) {
+        Film film = films.get(filmId);
+        film.getIdUsersLike().remove(userId);
+    }
+
 
     public Film getFilmById(Long id) {
         return films.get(id);
